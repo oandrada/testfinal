@@ -2,6 +2,8 @@ import re
 from datetime import datetime
 from pprint import pprint
 
+import yaml
+
 start_app = "ActivityTaskManager: START u0"
 stop_app = "Layer: Destroyed ActivityRecord"
 lines = []
@@ -13,27 +15,35 @@ def parsing_file():
         for line in file:
             if start_app in line:
                 lines.append(line)
-            if stop_app in line:
+            elif stop_app in line:
                 lines.append(line)
+    pprint(lines)
 
 
 def extraction():
     for line in lines:
         time = re.search(r'\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', line)
-        package = re.search("cmp=([\w\./]+)", line)
+        package = re.search(r"cmp=([\w./]+)", line)
         start_date = time.group(0)
         if package and time:
-            app = 'application{}'.format(len(extract) + 1)
             app_path = package.group(1)
-            extract[app] = {"app_path": app_path, 'ts_app_started': start_date}
-        if "/" in app_path:
-            apps_value = app_path.split('/')[0]
-            if apps_value and stop_app in line:
+            app = 'application_{}'.format(len(extract) + 1)
+            extract[app] = {"app_path": app_path, 'ts_app_started': start_date, 'ts_app_xclosed': None}
+        else:
+            if stop_app in line:
+                pack = re.search(r"com.([\w.]+)", line)
                 stop_date = time.group(0)
-                extract[app]['ts_app_closed'] = stop_date
+                path = pack.group(0)
+                for applications in extract.items():
+                    if path in applications[1]['app_path']:
+                        applications[1]['ts_app_xclosed'] = stop_date
 
-
-    pprint(extract)
+def yml():
+    yml = yaml.dump(extract)
+    file = open('output.yml', 'w')
+    file.write(yml)
+    file.close()
+    return yml
 
 
 def updated():
@@ -43,3 +53,4 @@ def updated():
 if __name__ == '__main__':
     parsing_file()
     extraction()
+    yml()
