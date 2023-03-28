@@ -17,7 +17,6 @@ def parsing_file():
                 lines.append(line)
             elif stop_app in line:
                 lines.append(line)
-    pprint(lines)
 
 
 def extraction():
@@ -28,7 +27,7 @@ def extraction():
         if package and time:
             app_path = package.group(1)
             app = 'application_{}'.format(len(extract) + 1)
-            extract[app] = {"app_path": app_path, 'ts_app_started': start_date, 'ts_app_xclosed': None}
+            extract[app] = {"app_path": app_path, 'ts_app_started': start_date, 'ts_app_closed': None, "lifespan": None}
         else:
             if stop_app in line:
                 pack = re.search(r"com.([\w.]+)", line)
@@ -36,7 +35,11 @@ def extraction():
                 path = pack.group(0)
                 for applications in extract.items():
                     if path in applications[1]['app_path']:
-                        applications[1]['ts_app_xclosed'] = stop_date
+                        applications[1]['ts_app_closed'] = stop_date
+                        time_stop = datetime.strptime(stop_date, '%m-%d %H:%M:%S.%f')
+                        time_start = datetime.strptime(applications[1]['ts_app_started'], '%m-%d %H:%M:%S.%f')
+                        lifespan = time_stop - time_start
+                        applications[1]['lifespan'] = str(lifespan.total_seconds()) + "s"
 
 def yml():
     yml = yaml.dump(extract)
