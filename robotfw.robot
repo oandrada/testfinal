@@ -18,6 +18,7 @@ Lifespan of the apps
     ${target}=  Set Variable  30
     ${lst}=   Create List
     ${percent}=  Set Variable  75
+    ${apps_name}=  Create List
     FOR   ${apps}    IN      @{info.items()}
          ${lifespan}=   Set Variable    ${apps[1]['lifespan']}
          ${seconds}=    Evaluate    float('${lifespan}'.replace('s', ''))
@@ -25,7 +26,6 @@ Lifespan of the apps
             Append to List  ${lst}  ${seconds}
          ELSE
             IF    ${seconds} >= ${target}
-                ${apps_name}=  Create List
                 Append to List  ${apps_name}  ${apps[1]['app_path']}
             END
          END
