@@ -49,11 +49,6 @@ def yml():
     return yml
 
 
-def updated():
-    pass
-
-
 if __name__ == '__main__':
     parsing_file()
-    extraction()
     yml()
